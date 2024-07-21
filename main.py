@@ -1,8 +1,6 @@
 import pygame
 import sys
-import random
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import simpledialog
 from utils.node_class import Node
 from password_cracker.user_interface import PasswordCracker
@@ -134,7 +132,7 @@ def main():
         ((100, 450), (350, 450)),  # Dead-end horizontal path
     ]
     # Define node properties
-    nodes = [Node("password_cracker", end) for _, end in paths]
+    nodes = [Node(id="password_cracker", position=end) for _, end in paths]
     node_size = 10
     node_color = GREEN
 
