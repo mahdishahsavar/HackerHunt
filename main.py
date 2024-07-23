@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import simpledialog
 
+background = random.choice([pygame.image.load("sl_031420_28950_10.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
+#MB(7/22/24)
 def init_pygame():
     pygame.init()
     width, height = 800, 600
@@ -85,6 +87,16 @@ def ask_question_node():
         return True
     return False
 
+def ask_question_firewall(): #MB(7/22/24)
+    root = tk.Tk()
+    root.withdraw()
+    user_input = simpledialog.askstring("Firewall Challenge", "Enter the password to disable the firewall:")
+    root.destroy()
+    correct_password = "secure123"
+    if user_input is not None and user_input == correct_password:
+        return True
+    return False
+
 def main():
     screen, width, height = init_pygame()
     clock = pygame.time.Clock()
@@ -94,6 +106,7 @@ def main():
     WHITE = (255, 255, 255)
     BLUE = (0, 128, 255)
     GREEN = (0, 255, 0)
+    RED = (255, 0, 0) #MB(7/22/24)
 
     # Define player properties
     player_size = 30
@@ -125,6 +138,11 @@ def main():
     node_color = GREEN
     node_problems = {tuple(node): random.choice(problems) for node in nodes}
 
+    firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
+    firewall_size = 15
+    firewall_color = RED
+    node_problems = {tuple(node): random.choice(problems) for node in nodes}
+
     # Main game loop
     while True:
         for event in pygame.event.get():
@@ -137,9 +155,11 @@ def main():
         if path_orientation_flag == "horizontal" or path_orientation_flag == "vertical":
             path_orientation = path_orientation_flag
         screen.fill(BLACK)
+        screen.blit(background, (0,0))  #MB(7/22/24)
         draw_paths(screen, BLUE, paths)
         draw_player(screen, player_color, player_pos, player_size, path_orientation)
         draw_nodes(screen, node_color, nodes, node_size)
+        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
 
         for node_pos in nodes[:]:
             if detect_collision(player_pos, node_pos, player_size, node_size):
@@ -148,6 +168,15 @@ def main():
                     print(f"Problem solved at node: {node_problems[tuple(node_pos)]}")
                 else:
                     print("You Need To Come Back")
+
+        for firewall_pos in firewall_nodes[:]: #MB(7/22/24)
+            if detect_collision(player_pos, firewall_pos, player_size, firewall_size):
+                if ask_question_firewall():
+                    firewall_nodes.remove(firewall_pos)
+                    print(f"Firewall disabled at: {firewall_pos}")
+                else:
+                    print("Firewall still active, try again!")
+
 
 
         pygame.display.flip()
