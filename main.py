@@ -183,7 +183,6 @@ def main():
                 else:
                     print("You Need To Come Back")
 
-
 #        for firewall_pos in firewall_nodes[:]: #MB(7/22/24)
 #            if detect_collision(player_pos, firewall_pos, player_size, firewall_size):
 #                if ask_question_firewall():
