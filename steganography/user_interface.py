@@ -6,6 +6,7 @@ from loguru import logger
 
 MESSAGES = ['some hacker message', 'another hacker message']
 
+
 class Steganography:
     def __init__(self):
         pygame.init()
@@ -20,10 +21,9 @@ class Steganography:
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
         self.GRAY = (200, 200, 200)
-        self.PASSWORDS = ["password", "for", "game", "team-24", "techwise"]
         self.screen = self._initialize_screen()
         self.font = self._set_font(None, 20)
-        self.instruction_text = self._get_challenge_instructions(self.PASSWORDS)
+        self.instruction_text = self._get_challenge_instructions()
         self.editor_rect = self._render_editor_surface()
         self.running = True
         self.run_button = self._render_run_button()
@@ -49,7 +49,7 @@ class Steganography:
     def _set_font(self, fontName, fontsize):
         return pygame.font.Font(fontName, fontsize)
 
-    def _get_challenge_instructions(self, possible_passwords):
+    def _get_challenge_instructions(self):
         instruction_text = [
             "Instructions:"
         ]
