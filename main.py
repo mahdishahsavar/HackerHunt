@@ -148,8 +148,6 @@ def main():
                     print(f"Problem solved at node: {node_problems[tuple(node_pos)]}")
                 else:
                     print("You Need To Come Back")
-
-
         pygame.display.flip()
         clock.tick(60)
 
