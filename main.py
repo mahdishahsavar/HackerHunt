@@ -152,10 +152,10 @@ def main():
     node_size = 10
     node_color = GREEN
 
-    firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
-    firewall_size = 15
-    firewall_color = RED
-    node_problems = {tuple(node): random.choice(problems) for node in nodes}
+    #firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
+    #firewall_size = 15
+    #firewall_color = RED
+    #node_problems = {tuple(node): random.choice(problems) for node in nodes}
 
     # Main game loop
     while True:
@@ -169,11 +169,11 @@ def main():
         if path_orientation_flag == "horizontal" or path_orientation_flag == "vertical":
             path_orientation = path_orientation_flag
         screen.fill(BLACK)
-        screen.blit(background, (0,0))  #MB(7/22/24)
+#        screen.blit(background, (0,0))  #MB(7/22/24)
         draw_paths(screen, BLUE, paths)
         draw_player(screen, player_color, player_pos, player_size, path_orientation)
         draw_nodes(screen, node_color, nodes, node_size)
-        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
+#        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
 
         for node in nodes:
             if detect_collision(player_pos, node.position, player_size, node_size):
