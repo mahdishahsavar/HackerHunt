@@ -7,9 +7,10 @@ from tkinter import simpledialog
 from utils.node_class import Node
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
+from steganography.user_interface import Steganography
 
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography()]
 PROBLEM_IDS_WITH_NODE = []
 
 def init_pygame():
