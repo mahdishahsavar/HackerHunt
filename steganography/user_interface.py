@@ -6,7 +6,6 @@ from loguru import logger
 
 MESSAGES = ['some hacker message', 'another hacker message']
 
-
 class Steganography:
     def __init__(self):
         pygame.init()
@@ -112,8 +111,3 @@ class Steganography:
             self._render_text_to_surface(self.screen, self.users_code, (self.editor_rect.x + 10, 20), self.font, self.BLACK)
             self._display_photo()
             pygame.display.flip()
-
-
-if __name__ == '__main__':
-    chall = Steganography()
-    chall.run()
