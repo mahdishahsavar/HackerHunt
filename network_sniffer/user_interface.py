@@ -1,6 +1,6 @@
 import pygame
 from loguru import logger
-from packet import get_packets
+from network_sniffer.packet import get_packets
 
 class NetworkSniffer:
     def __init__(self):
