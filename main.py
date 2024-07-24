@@ -1,9 +1,15 @@
 import pygame
 import sys
-import random
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import simpledialog
+from utils.node_class import Node
+from password_cracker.user_interface import PasswordCracker
+
+
+PROBLEMS = [PasswordCracker()]
+
+#background = random.choice([pygame.image.load("sl_031420_28950_10.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
+#MB(7/22/24)
 
 def init_pygame():
     pygame.init()
@@ -23,8 +29,8 @@ def draw_player(screen, color, position, size, path_orientation):
     pygame.draw.rect(screen, color, (*adjusted_position, size, size))
 
 def draw_nodes(screen, color, nodes, size):
-    for node_pos in nodes:
-        pygame.draw.circle(screen, color, node_pos, size)
+    for node in nodes:
+        pygame.draw.circle(screen, color, node.position, size)
 
 def draw_paths(screen, color, paths):
     for start, end in paths:
@@ -85,6 +91,27 @@ def ask_question_node():
         return True
     return False
 
+def ask_question_with_node_class(node):
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    challenge_id = node.node_id
+    challenge = None
+    for problem in PROBLEMS:
+        if problem.id == challenge_id:
+            challenge = problem
+    challenge.run()
+
+def ask_question_firewall(): #MB(7/22/24)
+    root = tk.Tk()
+    root.withdraw()
+    user_input = simpledialog.askstring("Firewall Challenge", "Enter the password to disable the firewall:")
+    root.destroy()
+    correct_password = "secure123"
+    if user_input is not None and user_input == correct_password:
+        return True
+    return False
+
+
 def main():
     screen, width, height = init_pygame()
     clock = pygame.time.Clock()
@@ -94,6 +121,7 @@ def main():
     WHITE = (255, 255, 255)
     BLUE = (0, 128, 255)
     GREEN = (0, 255, 0)
+    RED = (255, 0, 0) #MB(7/22/24)
 
     # Define player properties
     player_size = 30
@@ -120,9 +148,13 @@ def main():
         ((100, 450), (350, 450)),  # Dead-end horizontal path
     ]
     # Define node properties
-    nodes = [end for _, end in paths]
+    nodes = [Node(id="password_cracker", position=end) for _, end in paths]
     node_size = 10
     node_color = GREEN
+
+    firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
+    firewall_size = 15
+    firewall_color = RED
     node_problems = {tuple(node): random.choice(problems) for node in nodes}
 
     # Main game loop
@@ -137,18 +169,27 @@ def main():
         if path_orientation_flag == "horizontal" or path_orientation_flag == "vertical":
             path_orientation = path_orientation_flag
         screen.fill(BLACK)
+        screen.blit(background, (0,0))  #MB(7/22/24)
         draw_paths(screen, BLUE, paths)
         draw_player(screen, player_color, player_pos, player_size, path_orientation)
         draw_nodes(screen, node_color, nodes, node_size)
+        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
 
-        for node_pos in nodes[:]:
-            if detect_collision(player_pos, node_pos, player_size, node_size):
-                if ask_question_node():
-                    nodes.remove(node_pos)
-                    print(f"Problem solved at node: {node_problems[tuple(node_pos)]}")
+        for node in nodes:
+            if detect_collision(player_pos, node.position, player_size, node_size):
+                if ask_question_with_node_class(node):
+                    nodes.remove(node)
+                    print(f"Problem solved at node: {node.node_id}")
                 else:
                     print("You Need To Come Back")
 
+#        for firewall_pos in firewall_nodes[:]: #MB(7/22/24)
+#            if detect_collision(player_pos, firewall_pos, player_size, firewall_size):
+#                if ask_question_firewall():
+#                    firewall_nodes.remove(firewall_pos)
+#                    print(f"Firewall disabled at: {firewall_pos}")
+#                else:
+#                    print("Firewall still active, try again!")
 
         pygame.display.flip()
         clock.tick(60)
