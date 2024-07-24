@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import sys
 import tkinter as tk
@@ -6,18 +8,18 @@ from utils.node_class import Node
 from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
-PROBLEMS = [PasswordCracker()]
+from network_sniffer.user_interface import NetworkSniffer
+from steganography.user_interface import Steganography
 
 # Fonts
 font = pygame.font.Font(None, 36)
 
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography()]
+PROBLEM_IDS_WITH_NODE = []
 # Define game states
 MENU = 0
 GAME = 1
 game_state = MENU
-
-#background = random.choice([pygame.image.load("Menu_BG.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
-#MB(7/22/24)
 
 menu_items = ['Start Game', 'High Scores', 'Options', 'Quit']
 
@@ -35,18 +37,6 @@ def init_pygame():
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
 
-def ask_question_node():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    # Prompt the user for a number
-    user_input = simpledialog.askinteger("Node Challenge", "Enter the correct number to delete the node:")
-    root.destroy()
-    # Here you can implement any validation logic
-    correct_number = 42  # This is just an example
-    if user_input is not None and user_input == correct_number:
-        return True
-    return False
-
 def ask_question_with_node_class(node):
     root = tk.Tk()
     root.withdraw()  # Hide the main window
@@ -56,16 +46,28 @@ def ask_question_with_node_class(node):
         if problem.id == challenge_id:
             challenge = problem
     challenge.run()
+    
+def get_challenge_id():
+    for problem in PROBLEMS:
+        if not problem.id in PROBLEM_IDS_WITH_NODE:
+            PROBLEM_IDS_WITH_NODE.append(problem.id)
+            return problem.id
+        elif len(PROBLEM_IDS_WITH_NODE) == len(PROBLEM_IDS_WITH_NODE):
+            return "all_current_problems_exhausted_id"
 
-def ask_question_firewall(): #MB(7/22/24)
-    root = tk.Tk()
-    root.withdraw()
-    user_input = simpledialog.askstring("Firewall Challenge", "Enter the password to disable the firewall:")
-    root.destroy()
-    correct_password = "secure123"
-    if user_input is not None and user_input == correct_password:
-        return True
-    return False
+def choose_background():
+    key = random.randint(1,2)
+    choices = {
+        1 : "binary.jpg",
+        2 : "circuit_board.jpg",
+    }
+    path = f"utils/resources/{choices[key]}"
+    return pygame.image.load(path)
+
+BACKGROUND = choose_background()
+
+def add_background(screen, background):
+    screen.blit(background, (0, 0))
 
 def draw_menu(screen, selected_item):
     background_image = pygame.image.load('Menu_BG.jpg').convert()
@@ -123,13 +125,8 @@ def main():
     ]
 
     # Define node properties
-    nodes = [Node("password_cracker", path.end, 10, GREEN) for path in paths]
-    node_size = 10
-    node_color = GREEN
 
-    # Define problems
-    problems = ["P1", "P2", "P3", "P4", "P5"]
-
+    nodes = [Node(get_challenge_id(), path.end, 10, GREEN) for path in paths]
 
     clock = pygame.time.Clock()
     global  game_state
@@ -164,6 +161,3 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
-
-if __name__ == "__main__":
-    main()
