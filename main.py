@@ -3,13 +3,30 @@ import sys
 import tkinter as tk
 from tkinter import simpledialog
 from utils.node_class import Node
+from utils.player_class import Player  # Import the Player class
+from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
-
-
 PROBLEMS = [PasswordCracker()]
 
-#background = random.choice([pygame.image.load("sl_031420_28950_10.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
+# Fonts
+font = pygame.font.Font(None, 36)
+
+# Define game states
+MENU = 0
+GAME = 1
+game_state = MENU
+
+#background = random.choice([pygame.image.load("Menu_BG.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
 #MB(7/22/24)
+
+menu_items = ['Start Game', 'High Scores', 'Options', 'Quit']
+
+# Define colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+BLUE = (0, 128, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
 def init_pygame():
     pygame.init()
@@ -17,67 +34,6 @@ def init_pygame():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
-
-def draw_player(screen, color, position, size, path_orientation):
-    # Offset player position to center on the path
-    if path_orientation == 'horizontal':
-        # Adjust y-position to center vertically on a horizontal path
-        adjusted_position = (position[0], position[1] - size // 2)
-    elif path_orientation == 'vertical':
-        # Adjust x-position to center horizontally on a vertical path
-        adjusted_position = (position[0] - size // 2, position[1])
-    pygame.draw.rect(screen, color, (*adjusted_position, size, size))
-
-def draw_nodes(screen, color, nodes, size):
-    for node in nodes:
-        pygame.draw.circle(screen, color, node.position, size)
-
-def draw_paths(screen, color, paths):
-    for start, end in paths:
-        pygame.draw.line(screen, color, start, end, 5)  # Draw line with thickness of 5
-
-def detect_collision(player_pos, node_pos, player_size, node_size):
-    p_x, p_y = player_pos
-    n_x, n_y = node_pos
-    distance = ((p_x - n_x) ** 2 + (p_y - n_y) ** 2) ** 0.5
-    if distance < player_size / 2 + node_size:
-        return True
-    return False
-
-def is_on_path(old_pos, new_pos, paths):
-    # Simplistic collision detection that checks if a move stays on a path
-    for start, end in paths:
-        if start[0] == end[0]:  # Vertical path
-            if start[0] == new_pos[0] and start[1] <= new_pos[1] <= end[1]:
-                return True
-        elif start[1] == end[1]:  # Horizontal path
-            if start[1] == new_pos[1] and start[0] <= new_pos[0] <= end[0]:
-                return True
-    return False
-
-def move_player(player_pos, keys, paths, speed):
-    current_orientation = ""
-    if keys[pygame.K_LEFT]:
-        new_pos = (player_pos[0] - speed, player_pos[1])
-        if is_on_path(player_pos, new_pos, paths):
-            player_pos[0] -= speed
-            current_orientation = 'horizontal'
-    if keys[pygame.K_RIGHT]:
-        new_pos = (player_pos[0] + speed, player_pos[1])
-        if is_on_path(player_pos, new_pos, paths):
-            player_pos[0] += speed
-            current_orientation = 'horizontal'
-    if keys[pygame.K_UP]:
-        new_pos = (player_pos[0], player_pos[1] - speed)
-        if is_on_path(player_pos, new_pos, paths):
-            player_pos[1] -= speed
-            current_orientation = 'vertical'
-    if keys[pygame.K_DOWN]:
-        new_pos = (player_pos[0], player_pos[1] + speed)
-        if is_on_path(player_pos, new_pos, paths):
-            player_pos[1] += speed
-            current_orientation = 'vertical'
-    return current_orientation
 
 def ask_question_node():
     root = tk.Tk()
@@ -94,7 +50,7 @@ def ask_question_node():
 def ask_question_with_node_class(node):
     root = tk.Tk()
     root.withdraw()  # Hide the main window
-    challenge_id = node.node_id
+    challenge_id = node.id
     challenge = None
     for problem in PROBLEMS:
         if problem.id == challenge_id:
@@ -111,85 +67,100 @@ def ask_question_firewall(): #MB(7/22/24)
         return True
     return False
 
+def draw_menu(screen, selected_item):
+    background_image = pygame.image.load('Menu_BG.jpg').convert()
+    screen.blit(background_image, (0, 0))
+    for index, item in enumerate(menu_items):
+        if index == selected_item:
+            label = font.render(item, True, BLUE)  # Highlight the selected item
+        else:
+            label = font.render(item, True, WHITE)
+        # Calculate position of text
+        width = label.get_width()
+        height = label.get_height()
+        posX = (800 - width) / 2  # Center align text
+        posY = (150 + index * 50)  # Start at y = 150 and space items by 50 pixels
+        screen.blit(label, (posX, posY))
+
+def main_game(screen, width, height, player, nodes, paths):
+    node_size = 10
+    node_color = GREEN
+    screen.fill(BLACK)
+    keys = pygame.key.get_pressed()
+    player.move(keys, paths)  # Update player's position
+    #        screen.blit(background, (0,0))  #MB(7/22/24)
+    for path in paths:
+        path.draw(screen)
+    for node in nodes:
+        node.draw(screen)
+
+    player.draw(screen)  # Draw the player
+    for node in nodes:
+        if node.detect_collision(player.position,player.size):
+            if ask_question_with_node_class(node):
+                nodes.remove(node)
+                print(f"Problem solved at node: {node.id}")
+            else:
+                print("You Need To Come Back")
 
 def main():
     screen, width, height = init_pygame()
-    clock = pygame.time.Clock()
-
-    # Define colors
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    BLUE = (0, 128, 255)
-    GREEN = (0, 255, 0)
-    RED = (255, 0, 0) #MB(7/22/24)
-
-    # Define player properties
-    player_size = 30
-    player_color = WHITE
-    player_pos = [100, 100]  # Starting position on the first path
-    player_speed = 5
-    path_orientation = 'horizontal'
-    # Define problems
-    problems = ["P1", "P2", "P3", "P4", "P5"]
 
     # Define paths
     paths = [
-        ((100, 100), (700, 100)),  # Main horizontal path
-        ((100, 100), (100, 500)),  # Main vertical path from the start
-        ((700, 100), (700, 500)),  # Another vertical path
-        ((100, 500), (700, 500)),  # Bottom horizontal path
-        ((400, 100), (400, 500)),  # Central vertical path
-        ((200, 100), (200, 200)),  # Dead-end vertical path
-        ((600, 100), (600, 200)),  # Dead-end vertical path
-        ((300, 500), (500, 500)),  # Short horizontal path at the bottom
-        ((100, 300), (300, 300)),  # Short horizontal path in the middle left
-        ((500, 300), (700, 300)),  # Short horizontal path in the middle right
-        ((650, 100), (650, 150)),  # Dead-end vertical path
-        ((100, 450), (350, 450)),  # Dead-end horizontal path
+        Path((100, 100), (700, 100), BLUE),
+        Path((100, 100), (100, 500), BLUE),
+        Path((700, 100), (700, 500), BLUE),
+        Path((100, 500), (700, 500), BLUE),
+        Path((400, 100), (400, 500), BLUE),
+        Path((200, 100), (200, 200), BLUE),
+        Path((600, 100), (600, 200), BLUE),
+        Path((300, 500), (500, 500), BLUE),
+        Path((100, 300), (300, 300), BLUE),
+        Path((500, 300), (700, 300), BLUE),
+        Path((650, 100), (650, 150), BLUE),
+        Path((100, 450), (350, 450), BLUE),
     ]
+
     # Define node properties
-    nodes = [Node(id="password_cracker", position=end) for _, end in paths]
+    nodes = [Node("password_cracker", path.end, 10, GREEN) for path in paths]
     node_size = 10
     node_color = GREEN
 
-    firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
-    firewall_size = 15
-    firewall_color = RED
-    node_problems = {tuple(node): random.choice(problems) for node in nodes}
+    # Define problems
+    problems = ["P1", "P2", "P3", "P4", "P5"]
 
+
+    clock = pygame.time.Clock()
+    global  game_state
+    player = Player((100, 100), WHITE, 30, 5)
+
+    selected_item = 0
+    running= True
     # Main game loop
-    while True:
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if game_state == MENU:
+                    if event.key == pygame.K_UP:
+                        selected_item = (selected_item - 1) % len(menu_items)
+                    elif event.key == pygame.K_DOWN:
+                        selected_item = (selected_item + 1) % len(menu_items)
+                    elif event.key == pygame.K_RETURN:
+                        if menu_items[selected_item] == 'Quit':
+                            running = False
+                        elif menu_items[selected_item] == 'Start Game':
+                            game_state = GAME
+                elif game_state == GAME:
+                    if event.key == pygame.K_ESCAPE:
+                        game_state = MENU
 
-        keys = pygame.key.get_pressed()
-        path_orientation_flag = move_player(player_pos, keys, paths, player_speed)
-        if path_orientation_flag == "horizontal" or path_orientation_flag == "vertical":
-            path_orientation = path_orientation_flag
-        screen.fill(BLACK)
-        screen.blit(background, (0,0))  #MB(7/22/24)
-        draw_paths(screen, BLUE, paths)
-        draw_player(screen, player_color, player_pos, player_size, path_orientation)
-        draw_nodes(screen, node_color, nodes, node_size)
-        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
-
-        for node in nodes:
-            if detect_collision(player_pos, node.position, player_size, node_size):
-                if ask_question_with_node_class(node):
-                    nodes.remove(node)
-                    print(f"Problem solved at node: {node.node_id}")
-                else:
-                    print("You Need To Come Back")
-
-#        for firewall_pos in firewall_nodes[:]: #MB(7/22/24)
-#            if detect_collision(player_pos, firewall_pos, player_size, firewall_size):
-#                if ask_question_firewall():
-#                    firewall_nodes.remove(firewall_pos)
-#                    print(f"Firewall disabled at: {firewall_pos}")
-#                else:
-#                    print("Firewall still active, try again!")
+        if game_state == MENU:
+            draw_menu(screen, selected_item)
+        elif game_state == GAME:
+            main_game(screen,width,height, player, nodes, paths)
 
         pygame.display.flip()
         clock.tick(60)
