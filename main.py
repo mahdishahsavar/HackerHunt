@@ -1,12 +1,11 @@
+# main.py
 import pygame
 import sys
+from firewall import ask_question_firewall, detect_collision
 import random
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import simpledialog
 
-background = random.choice([pygame.image.load("sl_031420_28950_10.jpg"), pygame.image.load("abstract-techno-background-with-connecting-dots-circuit-board-image.jpg")])
-#MB(7/22/24)
 def init_pygame():
     pygame.init()
     width, height = 800, 600
@@ -15,12 +14,9 @@ def init_pygame():
     return screen, width, height
 
 def draw_player(screen, color, position, size, path_orientation):
-    # Offset player position to center on the path
     if path_orientation == 'horizontal':
-        # Adjust y-position to center vertically on a horizontal path
         adjusted_position = (position[0], position[1] - size // 2)
     elif path_orientation == 'vertical':
-        # Adjust x-position to center horizontally on a vertical path
         adjusted_position = (position[0] - size // 2, position[1])
     pygame.draw.rect(screen, color, (*adjusted_position, size, size))
 
@@ -30,9 +26,9 @@ def draw_nodes(screen, color, nodes, size):
 
 def draw_paths(screen, color, paths):
     for start, end in paths:
-        pygame.draw.line(screen, color, start, end, 5)  # Draw line with thickness of 5
+        pygame.draw.line(screen, color, start, end, 5)
 
-def detect_collision(player_pos, node_pos, player_size, node_size):
+def detect_node_collision(player_pos, node_pos, player_size, node_size):
     p_x, p_y = player_pos
     n_x, n_y = node_pos
     distance = ((p_x - n_x) ** 2 + (p_y - n_y) ** 2) ** 0.5
@@ -41,12 +37,11 @@ def detect_collision(player_pos, node_pos, player_size, node_size):
     return False
 
 def is_on_path(old_pos, new_pos, paths):
-    # Simplistic collision detection that checks if a move stays on a path
     for start, end in paths:
-        if start[0] == end[0]:  # Vertical path
+        if start[0] == end[0]:
             if start[0] == new_pos[0] and start[1] <= new_pos[1] <= end[1]:
                 return True
-        elif start[1] == end[1]:  # Horizontal path
+        elif start[1] == end[1]:
             if start[1] == new_pos[1] and start[0] <= new_pos[0] <= end[0]:
                 return True
     return False
@@ -77,73 +72,74 @@ def move_player(player_pos, keys, paths, speed):
 
 def ask_question_node():
     root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    # Prompt the user for a number
+    root.withdraw()
     user_input = simpledialog.askinteger("Node Challenge", "Enter the correct number to delete the node:")
     root.destroy()
-    # Here you can implement any validation logic
-    correct_number = 42  # This is just an example
+    correct_number = 42
     if user_input is not None and user_input == correct_number:
         return True
     return False
 
-def ask_question_firewall(): #MB(7/22/24)
-    root = tk.Tk()
-    root.withdraw()
-    user_input = simpledialog.askstring("Firewall Challenge", "Enter the password to disable the firewall:")
-    root.destroy()
-    correct_password = "secure123"
-    if user_input is not None and user_input == correct_password:
-        return True
-    return False
+def generate_random_firewall_positions(paths, num_firewalls, start_pos):
+    possible_positions = []
+    for start, end in paths:
+        if start[0] == end[0]:  # Vertical path
+            for y in range(start[1], end[1] + 1, 50):
+                possible_positions.append((start[0], y))
+        elif start[1] == end[1]:  # Horizontal path
+            for x in range(start[0], end[0] + 1, 50):
+                possible_positions.append((x, start[1]))
+
+    # Exclude the starting position
+    if start_pos in possible_positions:
+        possible_positions.remove(start_pos)
+    
+    return random.sample(possible_positions, num_firewalls)
 
 def main():
     screen, width, height = init_pygame()
     clock = pygame.time.Clock()
 
-    # Define colors
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
     BLUE = (0, 128, 255)
     GREEN = (0, 255, 0)
-    RED = (255, 0, 0) #MB(7/22/24)
+    RED = (255, 0, 0)
 
-    # Define player properties
     player_size = 30
     player_color = WHITE
-    player_pos = [100, 100]  # Starting position on the first path
+    player_pos = [100, 100]
     player_speed = 5
     path_orientation = 'horizontal'
-    # Define problems
+
     problems = ["P1", "P2", "P3", "P4", "P5"]
 
-    # Define paths
     paths = [
-        ((100, 100), (700, 100)),  # Main horizontal path
-        ((100, 100), (100, 500)),  # Main vertical path from the start
-        ((700, 100), (700, 500)),  # Another vertical path
-        ((100, 500), (700, 500)),  # Bottom horizontal path
-        ((400, 100), (400, 500)),  # Central vertical path
-        ((200, 100), (200, 200)),  # Dead-end vertical path
-        ((600, 100), (600, 200)),  # Dead-end vertical path
-        ((300, 500), (500, 500)),  # Short horizontal path at the bottom
-        ((100, 300), (300, 300)),  # Short horizontal path in the middle left
-        ((500, 300), (700, 300)),  # Short horizontal path in the middle right
-        ((650, 100), (650, 150)),  # Dead-end vertical path
-        ((100, 450), (350, 450)),  # Dead-end horizontal path
+        ((100, 100), (700, 100)),
+        ((100, 100), (100, 500)),
+        ((700, 100), (700, 500)),
+        ((100, 500), (700, 500)),
+        ((400, 100), (400, 500)),
+        ((200, 100), (200, 200)),
+        ((600, 100), (600, 200)),
+        ((300, 500), (500, 500)),
+        ((100, 300), (300, 300)),
+        ((500, 300), (700, 300)),
+        ((650, 100), (650, 150)),
+        ((100, 450), (350, 450)),
     ]
-    # Define node properties
+
     nodes = [end for _, end in paths]
     node_size = 10
     node_color = GREEN
     node_problems = {tuple(node): random.choice(problems) for node in nodes}
 
-    firewall_nodes = [(300, 300), (500, 300)] #MB(7/22/24)
+    # Randomly generate firewall positions
+    num_firewalls = 5
+    firewall_positions = generate_random_firewall_positions(paths, num_firewalls, tuple(player_pos))
     firewall_size = 15
     firewall_color = RED
-    node_problems = {tuple(node): random.choice(problems) for node in nodes}
 
-    # Main game loop
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -154,31 +150,32 @@ def main():
         path_orientation_flag = move_player(player_pos, keys, paths, player_speed)
         if path_orientation_flag == "horizontal" or path_orientation_flag == "vertical":
             path_orientation = path_orientation_flag
+        
         screen.fill(BLACK)
-        screen.blit(background, (0,0))  #MB(7/22/24)
         draw_paths(screen, BLUE, paths)
         draw_player(screen, player_color, player_pos, player_size, path_orientation)
         draw_nodes(screen, node_color, nodes, node_size)
-        draw_nodes(screen, firewall_color, firewall_nodes, firewall_size) #MB(7/22/24)
+        
+        for firewall_pos in firewall_positions:
+            pygame.draw.circle(screen, firewall_color, firewall_pos, firewall_size)
 
         for node_pos in nodes[:]:
-            if detect_collision(player_pos, node_pos, player_size, node_size):
+            if detect_node_collision(player_pos, node_pos, player_size, node_size):
                 if ask_question_node():
                     nodes.remove(node_pos)
                     print(f"Problem solved at node: {node_problems[tuple(node_pos)]}")
                 else:
                     print("You Need To Come Back")
-
-        for firewall_pos in firewall_nodes[:]: #MB(7/22/24)
-            if detect_collision(player_pos, firewall_pos, player_size, firewall_size):
-                if ask_question_firewall():
-                    firewall_nodes.remove(firewall_pos)
-                    print(f"Firewall disabled at: {firewall_pos}")
+        
+        for firewall_pos in firewall_positions[:]:
+            if detect_node_collision(player_pos, firewall_pos, player_size, firewall_size):
+                difficulty = 'medium'  # Example difficulty level
+                if ask_question_firewall(difficulty):
+                    firewall_positions.remove(firewall_pos)
+                    print(f"Firewall at {firewall_pos} cleared")
                 else:
-                    print("Firewall still active, try again!")
-
-
-
+                    print("Firewall challenge failed. You need to try again.")
+                    
         pygame.display.flip()
         clock.tick(60)
 
