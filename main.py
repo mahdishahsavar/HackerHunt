@@ -1,5 +1,4 @@
 import random
-
 import pygame
 import sys
 import tkinter as tk
@@ -10,6 +9,7 @@ from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from steganography.user_interface import Steganography
+from challeneges2 import IPAddressChallenge
 
 # Fonts
 font = pygame.font.Font(None, 36)
@@ -84,7 +84,7 @@ def draw_menu(screen, selected_item):
         posY = (150 + index * 50)  # Start at y = 150 and space items by 50 pixels
         screen.blit(label, (posX, posY))
 
-def main_game(screen, width, height, player, nodes, paths):
+def main_game(screen, width, height, player, nodes, paths, ip_challenge):
     node_size = 10
     node_color = GREEN
     screen.fill(BLACK)
@@ -95,6 +95,15 @@ def main_game(screen, width, height, player, nodes, paths):
         path.draw(screen)
     for node in nodes:
         node.draw(screen)
+
+    for node in nodes:
+        if node.detect_collision(player.position, player.size):
+            completed, message = ip_challenge.present_challenge(node.position)
+            if completed:
+                nodes.remove(node)
+                print(message)
+            else:
+                print(message)
 
     player.draw(screen)  # Draw the player
     for node in nodes:
@@ -125,15 +134,16 @@ def main():
     ]
 
     # Define node properties
-
     nodes = [Node(get_challenge_id(), path.end, 10, GREEN) for path in paths]
 
     clock = pygame.time.Clock()
-    global  game_state
+    global game_state
     player = Player((100, 100), WHITE, 30, 5)
 
+    ip_challenge = IPAddressChallenge()
+
     selected_item = 0
-    running= True
+    running = True
     # Main game loop
     while running:
         for event in pygame.event.get():
@@ -157,7 +167,7 @@ def main():
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
-            main_game(screen,width,height, player, nodes, paths)
+            main_game(screen, width, height, player, nodes, paths, ip_challenge)
 
         pygame.display.flip()
         clock.tick(60)
