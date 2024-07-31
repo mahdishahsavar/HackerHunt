@@ -11,10 +11,11 @@ from network_sniffer.user_interface import NetworkSniffer
 from steganography.user_interface import Steganography
 from challeneges2 import IPAddressChallenge
 
+pygame.font.init()
 # Fonts
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography(),IPAddressChallenge()]
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
 MENU = 0
@@ -84,7 +85,7 @@ def draw_menu(screen, selected_item):
         posY = (150 + index * 50)  # Start at y = 150 and space items by 50 pixels
         screen.blit(label, (posX, posY))
 
-def main_game(screen, width, height, player, nodes, paths, ip_challenge):
+def main_game(screen, width, height, player, nodes, paths):
     node_size = 10
     node_color = GREEN
     screen.fill(BLACK)
@@ -96,14 +97,7 @@ def main_game(screen, width, height, player, nodes, paths, ip_challenge):
     for node in nodes:
         node.draw(screen)
 
-    for node in nodes:
-        if node.detect_collision(player.position, player.size):
-            completed, message = ip_challenge.present_challenge(node.position)
-            if completed:
-                nodes.remove(node)
-                print(message)
-            else:
-                print(message)
+  
 
     player.draw(screen)  # Draw the player
     for node in nodes:
@@ -140,7 +134,7 @@ def main():
     global game_state
     player = Player((100, 100), WHITE, 30, 5)
 
-    ip_challenge = IPAddressChallenge()
+   
 
     selected_item = 0
     running = True
@@ -167,7 +161,7 @@ def main():
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
-            main_game(screen, width, height, player, nodes, paths, ip_challenge)
+            main_game(screen, width, height, player, nodes, paths)
 
         pygame.display.flip()
         clock.tick(60)
