@@ -1,15 +1,12 @@
 import random
 import pygame
-import sys
 import tkinter as tk
-from tkinter import simpledialog
 from utils.node_class import Node
 from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
-from steganography.user_interface import Steganography
-from challeneges2 import IPAddressChallenge
+from ip_challenge.challeneges2 import IPAddressChallenge
 
 pygame.font.init()
 # Fonts
@@ -57,7 +54,7 @@ def get_challenge_id():
         if not problem.id in PROBLEM_IDS_WITH_NODE:
             PROBLEM_IDS_WITH_NODE.append(problem.id)
             return problem.id
-        elif len(PROBLEM_IDS_WITH_NODE) == len(PROBLEM_IDS_WITH_NODE):
+        elif len(PROBLEM_IDS_WITH_NODE) == len(PROBLEMS):
             return "all_current_problems_exhausted_id"
 
 def choose_background():
