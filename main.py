@@ -1,5 +1,4 @@
 import random
-
 import pygame
 import sys
 import tkinter as tk
@@ -10,12 +9,15 @@ from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from steganography.user_interface import Steganography
+from challeneges2 import IPAddressChallenge
 
+pygame.font.init()
 # Fonts
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer()]#, Steganography()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge()]# Steganography()]
+
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
 MENU = 0
@@ -99,6 +101,8 @@ def main_game(screen, width, height, player, nodes, paths):
     for node in nodes:
         node.draw(screen)
 
+  
+
     player.draw(screen)  # Draw the player
     for node in nodes:
         if node.detect_collision(player.position,player.size):
@@ -128,15 +132,16 @@ def main():
     ]
 
     # Define node properties
-
     nodes = [Node(get_challenge_id(), path.end, 10, GREEN) for path in paths]
 
     clock = pygame.time.Clock()
-    global  game_state
+    global game_state
     player = Player((100, 100), WHITE, 30, 5)
 
+   
+
     selected_item = 0
-    running= True
+    running = True
     # Main game loop
     while running:
         for event in pygame.event.get():
@@ -160,10 +165,11 @@ def main():
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
-            main_game(screen,width,height, player, nodes, paths)
+            main_game(screen, width, height, player, nodes, paths)
 
         pygame.display.flip()
         clock.tick(60)
 
 if __name__ == "__main__":
     main()
+
