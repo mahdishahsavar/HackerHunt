@@ -168,13 +168,17 @@ def main():
                     print("You Need To Come Back")
         
         for firewall_pos in firewall_positions[:]:
-            if detect_node_collision(player_pos, firewall_pos, player_size, firewall_size):
-                difficulty = 'medium'  # Example difficulty level
+            difficulty = random.choice(('easy', 'medium', 'hard'))
+            print(f"Checking collision with firewall at {firewall_pos} with player at {player_pos}")
+            if detect_node_collision(player_pos, firewall_pos, player_size, firewall_size):  # Example difficulty level
+                print(f"Collision detected with firewall at {firewall_pos}")
                 if ask_question_firewall(difficulty):
                     firewall_positions.remove(firewall_pos)
                     print(f"Firewall at {firewall_pos} cleared")
                 else:
                     print("Firewall challenge failed. You need to try again.")
+            else:
+                print(f"No collision with firewall at {firewall_pos}")
                     
         pygame.display.flip()
         clock.tick(60)
