@@ -11,7 +11,7 @@ class Steganography:
         pygame.init()
         self.id = "steganography"
         self.tab = '    '
-        self.image = Image.open('resources/hacker.gif').convert('RGB')
+        self.image = Image.open('steganography/resources/hacker.gif').convert('RGB')
         self.embedded_message = MESSAGES[random.randint(0, len(MESSAGES)-1)]
         self.embedded_image = self._embed_message(self.embedded_message).convert('RGB')
         self.users_code = f"def steganography(photo):\n{self.tab}"
@@ -28,8 +28,8 @@ class Steganography:
         self.run_button = self._render_run_button()
 
     def _embed_message(self, message):
-        secret_image = lsb.hide("resources/hacker.gif", message)
-        secret_image.save("resources/embedded_hacker.gif")
+        secret_image = lsb.hide("steganography/resources/hacker.gif", message)
+        secret_image.save("steganography/resources/embedded_hacker.gif")
         return secret_image
 
     def _validate_user_code(self, user_code):

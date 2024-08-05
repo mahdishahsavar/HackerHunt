@@ -13,9 +13,11 @@ from challeneges2 import IPAddressChallenge
 
 pygame.font.init()
 # Fonts
+pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography(),IPAddressChallenge()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge()]# Steganography()]
+
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
 MENU = 0
@@ -32,7 +34,6 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 def init_pygame():
-    pygame.init()
     width, height = 800, 600
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
@@ -46,7 +47,10 @@ def ask_question_with_node_class(node):
     for problem in PROBLEMS:
         if problem.id == challenge_id:
             challenge = problem
-    challenge.run()
+    if challenge is not None:
+        challenge.run()
+    else:
+        print("No valid challenge found for ID:", challenge_id)
     
 def get_challenge_id():
     for problem in PROBLEMS:
@@ -165,3 +169,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+
+if __name__ == "__main__":
+    main()
+
