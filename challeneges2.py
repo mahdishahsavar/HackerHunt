@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import simpledialog
 
 
-# Define the QuestionDialog class for user input
+
 class QuestionDialog(simpledialog.Dialog):
     def __init__(self, parent, question, hint, sample_code):
         self.question = question
@@ -66,7 +66,7 @@ def user_function(target_ip):
 # Test your function with the given IP address
 print(user_function("10.0.0.1"))
 """,
-                    "test_cases": ["10.0.0.1"]
+                    "test_cases" : ["10.0.0.1"]
                 }
             ],
         }
