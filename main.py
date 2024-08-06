@@ -1,7 +1,7 @@
 # main.py
 import pygame
 import sys
-from firewall import ask_question_firewall, detect_collision
+from firewall import ask_question_firewall, detect_rectangle_collision
 import random
 import tkinter as tk
 from tkinter import simpledialog
@@ -80,21 +80,35 @@ def ask_question_node():
         return True
     return False
 
-def generate_random_firewall_positions(paths, num_firewalls, start_pos):
+def generate_random_firewall_positions(paths, num_firewalls, start_pos, firewall_width, firewall_height):
     possible_positions = []
     for start, end in paths:
         if start[0] == end[0]:  # Vertical path
             for y in range(start[1], end[1] + 1, 50):
-                possible_positions.append((start[0], y))
+                possible_positions.append(((start[0] - firewall_height // 2, y - firewall_width // 2), 'horizontal'))
         elif start[1] == end[1]:  # Horizontal path
             for x in range(start[0], end[0] + 1, 50):
-                possible_positions.append((x, start[1]))
+                possible_positions.append(((x - firewall_width // 2, start[1] - firewall_height // 2), 'vertical'))
 
     # Exclude the starting position
-    if start_pos in possible_positions:
-        possible_positions.remove(start_pos)
-    
+    if (start_pos, 'horizontal') in possible_positions:
+        possible_positions.remove((start_pos, 'horizontal'))
+    if (start_pos, 'vertical') in possible_positions:
+        possible_positions.remove((start_pos, 'vertical'))
+
     return random.sample(possible_positions, num_firewalls)
+
+def detect_rectangle_collision(player_pos, player_size, rect_pos, rect_width, rect_height):
+    player_rect = pygame.Rect(player_pos[0] - player_size // 2, player_pos[1] - player_size // 2, player_size, player_size)
+    firewall_rect = pygame.Rect(rect_pos[0], rect_pos[1], rect_width, rect_height)
+    return player_rect.colliderect(firewall_rect)
+
+def draw_firewalls(screen, firewalls, color, width, height):
+    for (firewall_pos, orientation) in firewalls:
+        if orientation == 'horizontal':
+            pygame.draw.rect(screen, color, (*firewall_pos, height, width))
+        else:
+            pygame.draw.rect(screen, color, (*firewall_pos, width, height))
 
 def main():
     screen, width, height = init_pygame()
@@ -136,9 +150,9 @@ def main():
 
     # Randomly generate firewall positions
     num_firewalls = 5
-    firewall_positions = generate_random_firewall_positions(paths, num_firewalls, tuple(player_pos))
-    firewall_size = 15
-    firewall_color = RED
+    firewall_width = 15
+    firewall_height = 30
+    firewall_positions = generate_random_firewall_positions(paths, num_firewalls, tuple(player_pos), firewall_width, firewall_height)
 
     while True:
         for event in pygame.event.get():
@@ -155,9 +169,7 @@ def main():
         draw_paths(screen, BLUE, paths)
         draw_player(screen, player_color, player_pos, player_size, path_orientation)
         draw_nodes(screen, node_color, nodes, node_size)
-        
-        for firewall_pos in firewall_positions:
-            pygame.draw.circle(screen, firewall_color, firewall_pos, firewall_size)
+        draw_firewalls(screen, firewall_positions, RED, firewall_width, firewall_height)
 
         for node_pos in nodes[:]:
             if detect_node_collision(player_pos, node_pos, player_size, node_size):
@@ -167,18 +179,21 @@ def main():
                 else:
                     print("You Need To Come Back")
         
-        for firewall_pos in firewall_positions[:]:
-            difficulty = random.choice(('easy', 'medium', 'hard'))
-            print(f"Checking collision with firewall at {firewall_pos} with player at {player_pos}")
-            if detect_node_collision(player_pos, firewall_pos, player_size, firewall_size):  # Example difficulty level
-                print(f"Collision detected with firewall at {firewall_pos}")
-                if ask_question_firewall(difficulty):
-                    firewall_positions.remove(firewall_pos)
-                    print(f"Firewall at {firewall_pos} cleared")
-                else:
-                    print("Firewall challenge failed. You need to try again.")
+        for firewall_pos, orientation in firewall_positions[:]:
+            if orientation == 'horizontal':
+                if detect_rectangle_collision(player_pos, player_size, firewall_pos, firewall_width, firewall_height):
+                    if ask_question_firewall('easy'):  # Example difficulty level
+                        firewall_positions.remove((firewall_pos, orientation))
+                        print(f"Firewall at {firewall_pos} cleared")
+                    else:
+                        print("Firewall challenge failed. You need to try again.")
             else:
-                print(f"No collision with firewall at {firewall_pos}")
+                if detect_rectangle_collision(player_pos, player_size, firewall_pos, firewall_height, firewall_width):
+                    if ask_question_firewall('easy'):  # Example difficulty level
+                        firewall_positions.remove((firewall_pos, orientation))
+                        print(f"Firewall at {firewall_pos} cleared")
+                    else:
+                        print("Firewall challenge failed. You need to try again.")
                     
         pygame.display.flip()
         clock.tick(60)
