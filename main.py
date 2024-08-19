@@ -7,13 +7,13 @@ from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from ip_challenge.Ip_Address_challenge import IPAddressChallenge
-
+from Test_Challenge.Test_challenge import SyntaxChallenge
 pygame.font.init()
 # Fonts
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge()]# Steganography()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge(), SyntaxChallenge()]# Steganography()]
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
