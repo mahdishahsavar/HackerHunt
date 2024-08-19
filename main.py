@@ -6,7 +6,7 @@ from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
-from ip_challenge.challeneges2 import IPAddressChallenge
+from ip_challenge.Ip_Address_challenge import IPAddressChallenge
 
 pygame.font.init()
 # Fonts
@@ -17,8 +17,7 @@ PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge()]# Steganog
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
-MENU = 0
-GAME = 1
+MENU, GAME, HIGH_SCORES = 0, 1, 2
 game_state = MENU
 
 menu_items = ['Start Game', 'High Scores', 'Options', 'Quit']
@@ -35,6 +34,27 @@ def init_pygame():
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
+
+def read_high_scores():
+    try:
+        with open("high_scores.txt", "r") as file:
+            scores = [line.strip().split(",") for line in file]
+        return sorted(scores, key=lambda x: -int(x[1]))[:5]  # Get top 5 scores
+    except FileNotFoundError:
+        return []
+
+def write_high_score(name, score):
+    with open("high_scores.txt", "a") as file:
+        file.write(f"{name},{score}\n")
+
+def draw_high_scores(screen):
+    high_scores = read_high_scores()
+    screen.fill(BLACK)
+    title = font.render("High Scores", True, WHITE)
+    screen.blit(title, (350, 100))
+    for index, score in enumerate(high_scores):
+        text = font.render(f"{index + 1}. {score[0]}: {score[1]}", True, WHITE)
+        screen.blit(text, (350, 150 + 40 * index))
 
 def ask_question_with_node_class(node):
     root = tk.Tk()
@@ -98,13 +118,12 @@ def main_game(screen, width, height, player, nodes, paths):
     for node in nodes:
         node.draw(screen)
 
-  
-
     player.draw(screen)  # Draw the player
     for node in nodes:
         if node.detect_collision(player.position,player.size):
             if ask_question_with_node_class(node):
                 nodes.remove(node)
+                player.score += 100
                 print(f"Problem solved at node: {node.id}")
             else:
                 print("You Need To Come Back")
@@ -133,7 +152,7 @@ def main():
 
     clock = pygame.time.Clock()
     global game_state
-    player = Player((100, 100), WHITE, 30, 5)
+    player = Player((100, 100), BLACK, 60, 5)
 
    
 
@@ -163,6 +182,8 @@ def main():
             draw_menu(screen, selected_item)
         elif game_state == GAME:
             main_game(screen, width, height, player, nodes, paths)
+        elif game_state == HIGH_SCORES:
+            draw_high_scores(screen)
 
         pygame.display.flip()
         clock.tick(60)
