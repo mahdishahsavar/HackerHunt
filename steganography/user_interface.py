@@ -50,7 +50,11 @@ class Steganography:
 
     def _get_challenge_instructions(self):
         instruction_text = [
-            "Instructions:"
+            "Instructions:",
+            "1. The hackers on our system keep sharing this meme",
+            "and we have intercepted it. we believe it has some",
+            "hidden information in it, decipher it and let us know.",
+            "2. To test your cypher, press the run button below"
         ]
         return instruction_text
 
