@@ -32,7 +32,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 def init_pygame():
-    width, height = 800, 600
+    width, height = 1000, 800
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
