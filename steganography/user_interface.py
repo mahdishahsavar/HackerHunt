@@ -81,7 +81,7 @@ class Steganography:
         return button
 
     def _display_photo(self):
-        photo = pygame.image.load("resources/hacker.gif")
+        photo = pygame.image.load("steganography/resources/hacker.gif")
         photo_rect = photo.get_rect()
         img_rect = pygame.Rect(self.screen_width//2 - photo_rect.width, self.screen_height - photo_rect.height - 100, self.screen_width//2, photo_rect.height)
         self.screen.blit(photo, img_rect)
