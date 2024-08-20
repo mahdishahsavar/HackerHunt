@@ -7,13 +7,14 @@ from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from ip_challenge.challeneges2 import IPAddressChallenge
+from steganography.user_interface import Steganography
 
 pygame.font.init()
 # Fonts
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge()]# Steganography()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography(), IPAddressChallenge()]
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
@@ -31,23 +32,19 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 def init_pygame():
-    width, height = 800, 600
+    width, height = 1000, 800
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
 
 def ask_question_with_node_class(node):
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    challenge_id = node.id
-    challenge = None
-    for problem in PROBLEMS:
-        if problem.id == challenge_id:
-            challenge = problem
-    if challenge is not None:
+    challenge = next((problem for problem in PROBLEMS if problem.id == node.id), None)
+    if challenge:
         challenge.run()
     else:
-        print("No valid challenge found for ID:", challenge_id)
+        print("No valid challenge found for ID:", node.id)
+    return True
+
     
 def get_challenge_id():
     for problem in PROBLEMS:
@@ -158,7 +155,6 @@ def main():
                 elif game_state == GAME:
                     if event.key == pygame.K_ESCAPE:
                         game_state = MENU
-
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:

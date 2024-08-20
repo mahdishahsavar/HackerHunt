@@ -50,7 +50,11 @@ class Steganography:
 
     def _get_challenge_instructions(self):
         instruction_text = [
-            "Instructions:"
+            "Instructions:",
+            "1. The hackers on our system keep sharing this meme",
+            "and we have intercepted it. we believe it has some",
+            "hidden information in it, decipher it and let us know.",
+            "2. To test your cypher, press the run button below"
         ]
         return instruction_text
 
@@ -81,7 +85,7 @@ class Steganography:
         return button
 
     def _display_photo(self):
-        photo = pygame.image.load("resources/hacker.gif")
+        photo = pygame.image.load("steganography/resources/hacker.gif")
         photo_rect = photo.get_rect()
         img_rect = pygame.Rect(self.screen_width//2 - photo_rect.width, self.screen_height - photo_rect.height - 100, self.screen_width//2, photo_rect.height)
         self.screen.blit(photo, img_rect)
