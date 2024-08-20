@@ -155,7 +155,6 @@ def main():
                 elif game_state == GAME:
                     if event.key == pygame.K_ESCAPE:
                         game_state = MENU
-
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
