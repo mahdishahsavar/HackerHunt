@@ -36,11 +36,11 @@ class Player:
                 self.path_orientation = 'vertical'
 
     def draw(self, screen):
-        # Draw the player on the screen based on the current orientation
+        # Calculate the center position based on orientation
         if self.path_orientation == 'horizontal':
-            adjusted_position = (self.position[0], self.position[1] - self.size // 2)
+            adjusted_position = (self.position[0] - self.size // 2, self.position[1] - self.size // 2)
         elif self.path_orientation == 'vertical':
-            adjusted_position = (self.position[0] - self.size // 2, self.position[1])
+            adjusted_position = (self.position[0] - self.size // 2, self.position[1] - self.size // 2)
         screen.blit(self.image, adjusted_position)
 
     def is_on_path(self, old_pos, new_pos, paths):
