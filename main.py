@@ -1,25 +1,23 @@
 import random
 import pygame
-import tkinter as tk
 from utils.node_class import Node
 from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
-from ip_challenge.challeneges2 import IPAddressChallenge
+from ip_challenge.Ip_Address_challenge import IPAddressChallenge
+from Test_Challenge.Test_challenge import SyntaxChallenge
 from steganography.user_interface import Steganography
-
 pygame.font.init()
 # Fonts
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), Steganography(), IPAddressChallenge()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge(), Steganography(), SyntaxChallenge()]
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
-MENU = 0
-GAME = 1
+MENU, GAME, HIGH_SCORES = 0, 1, 2
 game_state = MENU
 
 menu_items = ['Start Game', 'High Scores', 'Options', 'Quit']
@@ -32,17 +30,45 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 def init_pygame():
-    width, height = 1000, 800
+    width, height = 800, 600
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height
+
+def read_high_scores():
+    try:
+        with open("high_scores.txt", "r") as file:
+            scores = [int(line.strip()) for line in file]
+        return scores
+    except FileNotFoundError:
+        return []
+
+def write_high_score(score):
+    scores = read_high_scores()
+    scores.append(score)
+    scores = sorted(scores, reverse=True)[:5]  # Keep only top 5 scores
+    with open("high_scores.txt", "w") as file:
+        for score in scores:
+            file.write(f"{score}\n")
+
+def get_high_score():
+    scores = read_high_scores()
+    return max(scores) if scores else 0
+def draw_high_scores(screen):
+    high_scores = read_high_scores()
+    screen.fill(BLACK)
+    title = font.render("High Scores", True, WHITE)
+    screen.blit(title, (350, 100))
+    for index, score in enumerate(high_scores):
+        text = font.render(f"{index + 1}. {score}", True, WHITE)
+        screen.blit(text, (350, 150 + 40 * index))
 
 def ask_question_with_node_class(node):
     challenge = next((problem for problem in PROBLEMS if problem.id == node.id), None)
     if challenge:
         challenge.run()
-    else:
-        print("No valid challenge found for ID:", node.id)
+        return challenge.is_completed()
+    print("No valid challenge found for ID:", node.id)
     return True
 
     
@@ -95,17 +121,20 @@ def main_game(screen, width, height, player, nodes, paths):
     for node in nodes:
         node.draw(screen)
 
-  
-
     player.draw(screen)  # Draw the player
     for node in nodes:
         if node.detect_collision(player.position,player.size):
             if ask_question_with_node_class(node):
                 nodes.remove(node)
+                player.score += 100
+                current_high_score = get_high_score()
+                if player.score > current_high_score:
+                    write_high_score(player.score)
                 print(f"Problem solved at node: {node.id}")
             else:
                 print("You Need To Come Back")
-
+    score_text = font.render(f"Score: {player.score}", True, WHITE)
+    screen.blit(score_text, (10, 10))
 def main():
     screen, width, height = init_pygame()
 
@@ -130,7 +159,7 @@ def main():
 
     clock = pygame.time.Clock()
     global game_state
-    player = Player((100, 100), WHITE, 30, 5)
+    player = Player((100, 100), BLACK, 60, 5)
 
    
 
@@ -152,13 +181,20 @@ def main():
                             running = False
                         elif menu_items[selected_item] == 'Start Game':
                             game_state = GAME
+                        elif menu_items[selected_item] == 'High Scores':
+                            game_state = HIGH_SCORES
                 elif game_state == GAME:
+                    if event.key == pygame.K_ESCAPE:
+                        game_state = MENU
+                elif game_state == HIGH_SCORES:
                     if event.key == pygame.K_ESCAPE:
                         game_state = MENU
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
             main_game(screen, width, height, player, nodes, paths)
+        elif game_state == HIGH_SCORES:
+            draw_high_scores(screen)
 
         pygame.display.flip()
         clock.tick(60)
