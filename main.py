@@ -5,7 +5,7 @@ from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
-from ip_challenge.Ip_Address_challenge import IPAddressChallenge
+from ip_challenge.Ip_Address_challenge import IPChallenge
 from Test_Challenge.Test_challenge import SyntaxChallenge
 from steganography.user_interface import Steganography
 pygame.font.init()
@@ -13,7 +13,7 @@ pygame.font.init()
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge(), Steganography(), SyntaxChallenge()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPChallenge(), Steganography(), SyntaxChallenge()]
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
@@ -30,7 +30,7 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 def init_pygame():
-    width, height = 800, 600
+    width, height = 1000, 800
     screen = pygame.display.set_mode((width, height))
     pygame.display.set_caption("HackerHunt")
     return screen, width, height

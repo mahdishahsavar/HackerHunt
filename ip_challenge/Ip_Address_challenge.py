@@ -1,169 +1,130 @@
 import pygame
+from loguru import logger
+import random
 import socket
-import tkinter as tk
-from tkinter import simpledialog
+import sys
 
-
-
-class QuestionDialog(simpledialog.Dialog):
-    def __init__(self, parent, question, hint, sample_code):
-        self.question = question
-        self.hint = hint
-        self.sample_code = sample_code
-        self.answer = None
-        super().__init__(parent, title="Node Challenge")
-
-    def body(self, master):
-        tk.Label(master, text=self.question, wraplength=400).grid(row=0, column=0, padx=20, pady=10)
-        tk.Label(master, text="Hint:", fg="blue", wraplength=400).grid(row=1, column=0, padx=20, pady=5)
-        tk.Label(master, text=self.hint, wraplength=400).grid(row=2, column=0, padx=20, pady=5)
-        tk.Label(master, text="Sample Code:", fg="green", wraplength=400).grid(row=3, column=0, padx=20, pady=5)
-        tk.Label(master, text=self.sample_code, wraplength=400, bg="lightgrey").grid(row=4, column=0, padx=20, pady=5)
-        self.entry = tk.Text(master, height=15, width=60)
-        self.entry.grid(row=5, column=0, padx=20, pady=10)
-        return self.entry
-
-    def apply(self):
-        self.answer = self.entry.get("1.0", tk.END).strip()
-
-def ask_question_node(question, hint, sample_code):
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    dialog = QuestionDialog(root, question, hint, sample_code)
-    root.destroy()
-    return dialog.answer
-
-# Define the IPAddressChallenge class
-class IPAddressChallenge:
+class IPChallenge:
     def __init__(self):
+        # Initialize Pygame
         pygame.init()
-        self.id = "IP_challenge"
-        self.completed = False
+
+        # Screen settings
         self.screen_width = 1000
         self.screen_height = 800
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        self.WHITE = (255, 255, 255)
+        self.BLACK = (0, 0, 0)
+        self.GRAY = (200, 200, 200)
+        self.screen = self.initialize_screen()
+        self.font = self.set_font(None, 20)
+        self.instruction_text = self.get_challenge_instructions()
+        self.editor_rect = self.render_editor_surface()
+        self.running = True
+        self.tab = ' ' * 5
+        self.users_code = "def scan_ports(target_ip): \n" + self.tab
+        self.run_button = self.render_run_button()
+        self.target_ip = "10.0.0.1"  # Target IP for the challenge
+        self.expected_result = self.get_expected_result()
+        self.id = "ip_challenge"  # Added id attribute
+        self.completed=True
+
+    def initialize_screen(self):
+        screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         pygame.display.set_caption('IP Address Challenge')
-        self.font = pygame.font.Font(None, 40)
-        self.button_font = pygame.font.Font(None, 30)
-        self.node_problems = {
-            (700, 100): [
-                {
-                    "question": "Level 1: You've received a message from an anonymous source, claiming to have information about a vulnerable server. The message reads: 'Check the ports on 10.0.0.1'. Write a Python script to perform a basic port scan on the target IP address.",
-                    "hint": "Use the 'socket' library to attempt connections on different ports. A successful connection indicates the port is open.",
-                    "sample_code": """import socket
+        return screen
 
-def user_function(target_ip):
-    open_ports = []
-    ports = [22, 80, 443, 21, 25, 3306]  # Example ports to scan
-    for port in ports:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(1)  # Set timeout to 1 second
-        result = sock.connect_ex((target_ip, port))
-        if result == 0:
-            open_ports.append(port)
-        sock.close()
-    return "\\n".join([f"Port {port}: Open" for port in open_ports])
-
-# Test your function with the given IP address
-print(user_function("10.0.0.1"))
-""",
-                    "test_cases" : ["10.0.0.1"]
-                }
-            ],
-        }
-        self.node_levels = {node: 0 for node in self.node_problems}
-        self.initialize_interface_elements()
-        self.show_summary = True
-
-    def initialize_interface_elements(self):
-        self.nodes = []
-        for node_pos in self.node_problems:
-            rect = pygame.Rect(node_pos[0], node_pos[1], 100, 50)
-            self.nodes.append((rect, node_pos))
-
-    def validate_function(self, user_code, test_cases):
-        # Always return True to pass the test case
-        return True
-
-    def present_challenge(self, node_pos):
-        level = self.node_levels[node_pos]
-        if level < len(self.node_problems[node_pos]):
-            problem = self.node_problems[node_pos][level]
-            question = problem["question"]
-            hint = problem["hint"]
-            sample_code = problem["sample_code"]
-            test_cases = problem["test_cases"]
-
-            user_code = ask_question_node(question, hint, sample_code)
-            if user_code and self.validate_function(user_code, test_cases):
-                self.node_levels[node_pos] += 1
-                if self.node_levels[node_pos] >= len(self.node_problems[node_pos]):
-                    return True, f"All problems solved at node: {node_pos}"
-                else:
-                    return False, f"Level {self.node_levels[node_pos]} completed at node: {node_pos}"
-            else:
-                return False, "Incorrect answer or function did not pass the test cases. Try again."
-        return False, None
+    def set_font(self, font_name, fontsize):
+        return pygame.font.Font(font_name, fontsize)
     
     def is_completed(self):
-        return True # just return true for this one because it needs work to decouple all the code
-    
+        return self.completed
+
+    def get_challenge_instructions(self):
+        instruction_text = [
+            "Instructions:",
+            "1. You need to create a function to scan ports on the IP address.",
+            "2. The target IP address is 10.0.0.1.",
+            "3. Your function should scan common ports and return a list of open ports.",
+            "4. Click 'RUN' when you are done to test your changes."
+        ]
+        return instruction_text
+
+    def render_editor_surface(self):
+        editor_rect = pygame.Rect(self.screen_width // 2, 0, self.screen_width // 2, self.screen_height)
+        return editor_rect
+
+    def render_text_to_surface(self, surface, text, position, font, color):
+        lines = text.split('\n')
+        y_offset = 0
+        for line in lines:
+            text_surface = font.render(line, True, color)
+            surface.blit(text_surface, (position[0], position[1] + y_offset))
+            y_offset += text_surface.get_height() + 5
+
+    def validate_user_code(self, user_input):
+        try:
+            logger.info(f"Validating user code: {user_input}")
+            local_vars = {}
+            exec(user_input, globals(), local_vars)
+            result = local_vars["scan_ports"](self.target_ip)
+            if result == self.expected_result:
+                logger.info("User code passed!")
+                return True
+            else:
+                logger.info(f"User code failed. Expected result: {self.expected_result}, Got: {result}")
+                return False
+        except Exception as e:
+            logger.error(f"An error occurred with your code: {e}")
+            return False
+
+    def is_run_code_button_pressed(self, run_button):
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_pressed = pygame.mouse.get_pressed()
+        if mouse_pressed[0]:
+            if run_button.collidepoint(mouse_pos):
+                return True
+        return False
+
+    def render_run_button(self):
+        button = pygame.Rect(30, self.screen_height - 60, 75, 30)
+        pygame.draw.rect(self.screen, self.BLACK, button)
+        self.render_text_to_surface(self.screen, "RUN", [button.x + 25, button.y + 10], self.font, self.GRAY)
+        return button
+
+    def get_expected_result(self):
+        # Example expected result, adjust as needed
+        return "\n".join([f"Port {port}: Open" for port in [22, 80, 443]])
+
     def run(self):
-        running = True
-        while running:
+        while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    pos = pygame.mouse.get_pos()
-                    if self.show_summary:
-                        if self.button_rect.collidepoint(pos):
-                            self.show_summary = False
-                            self.present_challenge((700, 100))
+                    self.running = False
+                    self.completed=True
+                elif self.is_run_code_button_pressed(self.run_button):
+                    if self.validate_user_code(self.users_code):
+                        logger.info("Challenge Passed!")
+                        self.running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.users_code += '\n' + self.tab
+                    elif event.key == pygame.K_TAB:
+                        self.users_code += self.tab
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.users_code = self.users_code[:-1]
                     else:
-                        for rect, node_pos in self.nodes:
-                            if rect.collidepoint(pos):
-                                success, message = self.present_challenge(node_pos)
-                                print(message)
-
-            self.screen.fill((255, 255, 255))
-
-            if self.show_summary:
-                self.draw_summary()
-            else:
-                self.draw_challenge()
-
+                        self.users_code += event.unicode
+            self.screen.fill(self.WHITE)
+            self.render_text_to_surface(self.screen, '\n'.join(self.instruction_text), (20, 20), self.font, self.BLACK)
+            self.render_run_button()
+            pygame.draw.rect(self.screen, self.GRAY, self.editor_rect)
+            self.render_text_to_surface(self.screen, self.users_code, (self.editor_rect.x + 10, 20), self.font, self.BLACK)
             pygame.display.flip()
 
-        pygame.quit()
-
-    def draw_summary(self):
-        title = self.font.render("Welcome to the IP Address Challenge:", True, (0, 0, 0))
-        description = self.font.render("Press the button below to start the challenge.", True, (0, 0, 0))
-
-        # Center the title and description
-        title_rect = title.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 100))
-        description_rect = description.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
-
-        self.screen.blit(title, title_rect)
-        self.screen.blit(description, description_rect)
-
-        # Center the button
-        self.button_rect = pygame.Rect(0, 0, 200, 50)
-        self.button_rect.center = (self.screen_width // 2, self.screen_height // 2 + 100)
-
-        pygame.draw.rect(self.screen, (0, 255, 0), self.button_rect)
-        button_text = self.button_font.render("Start Challenge", True, (255, 255, 255))
-        button_text_rect = button_text.get_rect(center=self.button_rect.center)
-        self.screen.blit(button_text, button_text_rect)
-
-    def draw_challenge(self):
-        for rect, node_pos in self.nodes:
-            pygame.draw.rect(self.screen, (0, 0, 255), rect)
-            text = self.font.render(f"Node {node_pos}", True, (255, 255, 255))
-            self.screen.blit(text, rect.topleft)
-
-
 if __name__ == '__main__':
-    challenge = IPAddressChallenge()
+    # Configure Loguru to output logs to a file and the console
+    logger.add("ip_challenge.log", rotation="1 MB", level="INFO")
+    logger.add(sys.stdout, level="INFO")
+
+    challenge = IPChallenge()
     challenge.run()
