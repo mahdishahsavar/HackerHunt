@@ -100,6 +100,7 @@ class IPChallenge:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    self.completed=True
                 elif self.is_run_code_button_pressed(self.run_button):
                     if self.validate_user_code(self.users_code):
                         logger.info("Challenge Passed!")
