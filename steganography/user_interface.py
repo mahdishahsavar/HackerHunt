@@ -9,6 +9,7 @@ MESSAGES = ['some hacker message', 'another hacker message']
 class Steganography:
     def __init__(self):
         pygame.init()
+        self.completed = False
         self.id = "steganography"
         self.tab = '    '
         self.image = Image.open('steganography/resources/hacker.gif').convert('RGB')
@@ -91,6 +92,9 @@ class Steganography:
         img_rect = pygame.Rect(self.screen_width//2 - photo_rect.width, self.screen_height - photo_rect.height - 100, self.screen_width//2, photo_rect.height)
         self.screen.blit(photo, img_rect)
 
+    def is_completed(self):
+        return self.completed
+    
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -99,6 +103,7 @@ class Steganography:
                 elif self._is_run_code_button_pressed(self.run_button):
                     if self._validate_user_code(self.users_code):
                         logger.info(f"Passed!")
+                        self.completed = True
                         self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:

@@ -70,6 +70,7 @@ def ask_question_with_node_class(node):
         return challenge.is_completed()
     print("No valid challenge found for ID:", node.id)
     return True
+    
 
     
 def get_challenge_id():
@@ -135,6 +136,7 @@ def main_game(screen, width, height, player, nodes, paths):
                 print("You Need To Come Back")
     score_text = font.render(f"Score: {player.score}", True, WHITE)
     screen.blit(score_text, (10, 10))
+
 def main():
     screen, width, height = init_pygame()
 
