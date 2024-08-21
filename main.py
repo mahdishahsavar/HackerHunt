@@ -5,7 +5,7 @@ from utils.player_class import Player  # Import the Player class
 from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
-from Ip_Address_challenge import IPAddressChallenge
+from ip_challenge.Ip_Address_challenge import IPAddressChallenge
 from Test_Challenge.Test_challenge import SyntaxChallenge
 from steganography.user_interface import Steganography
 pygame.font.init()
