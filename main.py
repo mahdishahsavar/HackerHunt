@@ -39,22 +39,29 @@ def init_pygame():
 def read_high_scores():
     try:
         with open("high_scores.txt", "r") as file:
-            scores = [line.strip().split(",") for line in file]
-        return sorted(scores, key=lambda x: -int(x[1]))[:5]  # Get top 5 scores
+            scores = [int(line.strip()) for line in file]
+        return scores
     except FileNotFoundError:
         return []
 
-def write_high_score(name, score):
-    with open("high_scores.txt", "a") as file:
-        file.write(f"{name},{score}\n")
+def write_high_score(score):
+    scores = read_high_scores()
+    scores.append(score)
+    scores = sorted(scores, reverse=True)[:5]  # Keep only top 5 scores
+    with open("high_scores.txt", "w") as file:
+        for score in scores:
+            file.write(f"{score}\n")
 
+def get_high_score():
+    scores = read_high_scores()
+    return max(scores) if scores else 0
 def draw_high_scores(screen):
     high_scores = read_high_scores()
     screen.fill(BLACK)
     title = font.render("High Scores", True, WHITE)
     screen.blit(title, (350, 100))
     for index, score in enumerate(high_scores):
-        text = font.render(f"{index + 1}. {score[0]}: {score[1]}", True, WHITE)
+        text = font.render(f"{index + 1}. {score}", True, WHITE)
         screen.blit(text, (350, 150 + 40 * index))
 
 def ask_question_with_node_class(node):
@@ -121,10 +128,14 @@ def main_game(screen, width, height, player, nodes, paths):
             if ask_question_with_node_class(node):
                 nodes.remove(node)
                 player.score += 100
+                current_high_score = get_high_score()
+                if player.score > current_high_score:
+                    write_high_score(player.score)
                 print(f"Problem solved at node: {node.id}")
             else:
                 print("You Need To Come Back")
-
+    score_text = font.render(f"Score: {player.score}", True, WHITE)
+    screen.blit(score_text, (10, 10))
 def main():
     screen, width, height = init_pygame()
 
@@ -171,7 +182,12 @@ def main():
                             running = False
                         elif menu_items[selected_item] == 'Start Game':
                             game_state = GAME
+                        elif menu_items[selected_item] == 'High Scores':
+                            game_state = HIGH_SCORES
                 elif game_state == GAME:
+                    if event.key == pygame.K_ESCAPE:
+                        game_state = MENU
+                elif game_state == HIGH_SCORES:
                     if event.key == pygame.K_ESCAPE:
                         game_state = MENU
         if game_state == MENU:
