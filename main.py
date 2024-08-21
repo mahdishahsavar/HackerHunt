@@ -67,8 +67,8 @@ def ask_question_with_node_class(node):
     challenge = next((problem for problem in PROBLEMS if problem.id == node.id), None)
     if challenge:
         challenge.run()
-    else:
-        print("No valid challenge found for ID:", node.id)
+        return challenge.is_completed()
+    print("No valid challenge found for ID:", node.id)
     return True
 
     

@@ -4,6 +4,7 @@ class SyntaxChallenge:
     def __init__(self):
         self.id = "syntax_challenge"
         pygame.init()
+        self.completed = False
         self.screen_width = 800
         self.screen_height = 600
         self.WHITE = (255, 255, 255)
@@ -56,6 +57,8 @@ class SyntaxChallenge:
         self.render_text_to_surface(self.screen, "RUN", [button.x + 25, button.y + 5], self.font, self.WHITE)
         return button
 
+    def is_completed(self):
+        return self.completed
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -64,6 +67,7 @@ class SyntaxChallenge:
                 elif self.is_run_code_button_pressed(self.run_button):
                     if self.validate_user_code():
                         print("Correct syntax!")
+                        self.completed = True
                         self.running = False
                     else:
                         print("Incorrect syntax, please try again.")
