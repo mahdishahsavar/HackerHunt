@@ -26,7 +26,7 @@ class IPChallenge:
         self.target_ip = "10.0.0.1"  # Target IP for the challenge
         self.expected_result = self.get_expected_result()
         self.id = "ip_challenge"  # Added id attribute
-        self.completed=False
+        self.completed=True
 
     def initialize_screen(self):
         screen = pygame.display.set_mode((self.screen_width, self.screen_height))
