@@ -28,7 +28,8 @@ class Steganography:
         self.run_button = self._render_run_button()
 
     def _embed_message(self, message):
-        secret_image = lsb.hide("steganography/resources/hacker.gif", message)
+        image = Image.open("steganography/resources/hacker.gif").convert('RGB')
+        secret_image = lsb.hide(image, message)
         secret_image.save("steganography/resources/embedded_hacker.gif")
         return secret_image
 
