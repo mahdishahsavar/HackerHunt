@@ -43,7 +43,7 @@ def ask_question_with_node_class(node):
         challenge.run()
     else:
         print("No valid challenge found for ID:", node.id)
-    return True
+    return challenge.is_completed()
 
     
 def get_challenge_id():
@@ -103,8 +103,6 @@ def main_game(screen, width, height, player, nodes, paths):
             if ask_question_with_node_class(node):
                 nodes.remove(node)
                 print(f"Problem solved at node: {node.id}")
-            else:
-                print("You Need To Come Back")
 
 def main():
     screen, width, height = init_pygame()

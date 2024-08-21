@@ -5,6 +5,7 @@ import random
 class PasswordCracker:
     def __init__(self):
         self.id = "password_cracker"
+        self.completed = False
         pygame.init()
         self.screen_width = 1000
         self.screen_height = 800
@@ -87,6 +88,9 @@ class PasswordCracker:
                 master_password += context[index]
         return master_password
 
+    def is_completed(self):
+        return self.completed
+    
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -95,6 +99,7 @@ class PasswordCracker:
                 elif self.is_run_code_button_pressed(self.run_button):
                     if self.validate_user_code(self.users_code):
                         logger.info(f"Passed!")
+                        self.completed = True
                         self.running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:

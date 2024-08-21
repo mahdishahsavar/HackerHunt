@@ -5,6 +5,7 @@ from network_sniffer.packet import get_packets
 class NetworkSniffer:
     def __init__(self):
         self.id = "network_sniffer"
+        self.completed = False
         pygame.init()
         self.tab = ' ' * 5
         self.screen_width = 1000
@@ -84,7 +85,10 @@ class NetworkSniffer:
         pygame.draw.rect(self.screen, self.BLACK, button)
         self.render_text_to_surface(self.screen, "RUN", [button.x + 25, button.y + 10], self.font, self.GRAY)
         return button
-
+    
+    def is_completed(self):
+        return self.completed
+    
     def run(self):
         while self.running:
             for event in pygame.event.get():
@@ -93,6 +97,7 @@ class NetworkSniffer:
                 elif self.is_run_code_button_pressed(self.run_button):
                     if self.validate_user_code(self.users_code):
                         logger.info(f"Passed!")
+                        self.completed = True
                         self.running = False
                     else:
                         logger.info(f"Wrong code!")
