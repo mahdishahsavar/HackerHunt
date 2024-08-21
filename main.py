@@ -8,12 +8,13 @@ from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from ip_challenge.Ip_Address_challenge import IPAddressChallenge
 from Test_Challenge.Test_challenge import SyntaxChallenge
+from steganography.user_interface import Steganography
 pygame.font.init()
 # Fonts
 pygame.init()
 font = pygame.font.Font(None, 36)
 
-PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge(), SyntaxChallenge()]# Steganography()]
+PROBLEMS = [PasswordCracker(), NetworkSniffer(), IPAddressChallenge(), Steganography(), SyntaxChallenge()]
 
 PROBLEM_IDS_WITH_NODE = []
 # Define game states
@@ -57,17 +58,13 @@ def draw_high_scores(screen):
         screen.blit(text, (350, 150 + 40 * index))
 
 def ask_question_with_node_class(node):
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    challenge_id = node.id
-    challenge = None
-    for problem in PROBLEMS:
-        if problem.id == challenge_id:
-            challenge = problem
-    if challenge is not None:
+    challenge = next((problem for problem in PROBLEMS if problem.id == node.id), None)
+    if challenge:
         challenge.run()
     else:
-        print("No valid challenge found for ID:", challenge_id)
+        print("No valid challenge found for ID:", node.id)
+    return True
+
     
 def get_challenge_id():
     for problem in PROBLEMS:
@@ -177,7 +174,6 @@ def main():
                 elif game_state == GAME:
                     if event.key == pygame.K_ESCAPE:
                         game_state = MENU
-
         if game_state == MENU:
             draw_menu(screen, selected_item)
         elif game_state == GAME:
