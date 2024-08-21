@@ -7,7 +7,11 @@ class Player:
         self.size = size
         self.speed = speed
         self.path_orientation = 'horizontal'  # Initial orientation
-
+        #self.image = pygame.transform.scale(pygame.image.load('utils/resources/Hacker.png'), (size, size))
+        self.image = pygame.image.load('utils/resources/Hacker.png').convert_alpha()
+        # Scale the image to the desired size
+        self.image = pygame.transform.scale(self.image, (size, size))
+        self.score = 0
     def move(self, keys, paths):
         # Handle movement, check path constraints
         if keys[pygame.K_LEFT]:
@@ -37,7 +41,7 @@ class Player:
             adjusted_position = (self.position[0], self.position[1] - self.size // 2)
         elif self.path_orientation == 'vertical':
             adjusted_position = (self.position[0] - self.size // 2, self.position[1])
-        pygame.draw.rect(screen, self.color, (*adjusted_position, self.size, self.size))
+        screen.blit(self.image, adjusted_position)
 
     def is_on_path(self, old_pos, new_pos, paths):
         for path in paths:
