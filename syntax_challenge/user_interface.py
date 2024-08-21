@@ -5,8 +5,8 @@ class SyntaxChallenge:
         self.id = "syntax_challenge"
         pygame.init()
         self.completed = False
-        self.screen_width = 800
-        self.screen_height = 600
+        self.screen_width = 1000
+        self.screen_height = 800
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
         self.GRAY = (200, 200, 200)

@@ -6,7 +6,7 @@ from utils.path_class import Path
 from password_cracker.user_interface import PasswordCracker
 from network_sniffer.user_interface import NetworkSniffer
 from ip_challenge.Ip_Address_challenge import IPChallenge
-from Test_Challenge.Test_challenge import SyntaxChallenge
+from syntax_challenge.user_interface import SyntaxChallenge
 from steganography.user_interface import Steganography
 pygame.font.init()
 # Fonts
@@ -20,7 +20,7 @@ PROBLEM_IDS_WITH_NODE = []
 MENU, GAME, HIGH_SCORES = 0, 1, 2
 game_state = MENU
 
-menu_items = ['Start Game', 'High Scores', 'Options', 'Quit']
+menu_items = ['Start Game', 'High Scores', 'Quit']
 
 # Define colors
 BLACK = (0, 0, 0)
@@ -72,7 +72,6 @@ def ask_question_with_node_class(node):
     return True
     
 
-    
 def get_challenge_id():
     for problem in PROBLEMS:
         if not problem.id in PROBLEM_IDS_WITH_NODE:
@@ -90,10 +89,13 @@ def choose_background():
     path = f"utils/resources/{choices[key]}"
     return pygame.image.load(path)
 
+
 BACKGROUND = choose_background()
+
 
 def add_background(screen, background):
     screen.blit(background, (0, 0))
+
 
 def draw_menu(screen, selected_item):
     background_image = pygame.image.load('Menu_BG.jpg').convert()
@@ -106,9 +108,19 @@ def draw_menu(screen, selected_item):
         # Calculate position of text
         width = label.get_width()
         height = label.get_height()
-        posX = (800 - width) / 2  # Center align text
-        posY = (150 + index * 50)  # Start at y = 150 and space items by 50 pixels
+        posX = (1000 - width) / 2  # Center align text
+        posY = (250 + index * 50)  # Start at y = 150 and space items by 50 pixels
         screen.blit(label, (posX, posY))
+
+
+def display_message(screen, message, duration=2000):
+    text = font.render(message, True, pygame.Color('white'))
+    text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+    background_rect = pygame.Rect(text_rect.left - 10, text_rect.top - 10, text_rect.width + 20, text_rect.height + 20)
+    pygame.draw.rect(screen, (0, 0, 0, 128), background_rect)  # Black background with transparency
+    screen.blit(text, text_rect)
+    pygame.display.update(background_rect)  # Update only the part of the screen that contains the message
+    pygame.time.wait(duration)  # Keep the message on the screen for 'duration' milliseconds
 
 def main_game(screen, width, height, player, nodes, paths):
     node_size = 10
@@ -121,7 +133,7 @@ def main_game(screen, width, height, player, nodes, paths):
         path.draw(screen)
     for node in nodes:
         node.draw(screen)
-
+    message = None
     player.draw(screen)  # Draw the player
     for node in nodes:
         if node.detect_collision(player.position,player.size):
@@ -131,27 +143,31 @@ def main_game(screen, width, height, player, nodes, paths):
                 current_high_score = get_high_score()
                 if player.score > current_high_score:
                     write_high_score(player.score)
-                print(f"Problem solved at node: {node.id}")
+                message = "Problem Solved!"
             else:
-                print("You Need To Come Back")
+                message = "You Cannot Pass This Node!"
+    if message:
+        display_message(screen, message, 1000)
+        message = None
     score_text = font.render(f"Score: {player.score}", True, WHITE)
     screen.blit(score_text, (10, 10))
+
 
 def main():
     screen, width, height = init_pygame()
 
     # Define paths
     paths = [
-        Path((100, 100), (700, 100), BLUE),
-        Path((100, 100), (100, 500), BLUE),
-        Path((700, 100), (700, 500), BLUE),
-        Path((100, 500), (700, 500), BLUE),
-        Path((400, 100), (400, 500), BLUE),
+        Path((100, 100), (900, 100), BLUE),
+        Path((100, 100), (100, 700), BLUE),
+        Path((900, 100), (900, 700), BLUE),
+        Path((100, 700), (900, 700), BLUE),
+        Path((400, 100), (400, 700), BLUE),
         Path((200, 100), (200, 200), BLUE),
         Path((600, 100), (600, 200), BLUE),
-        Path((300, 500), (500, 500), BLUE),
+        Path((400, 400), (600, 400), BLUE),
         Path((100, 300), (300, 300), BLUE),
-        Path((500, 300), (700, 300), BLUE),
+        Path((900, 300), (500, 300), BLUE),
         Path((650, 100), (650, 150), BLUE),
         Path((100, 450), (350, 450), BLUE),
     ]
@@ -162,9 +178,6 @@ def main():
     clock = pygame.time.Clock()
     global game_state
     player = Player((100, 100), BLACK, 60, 5)
-
-   
-
     selected_item = 0
     running = True
     # Main game loop
@@ -200,6 +213,7 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+
 
 if __name__ == "__main__":
     main()
