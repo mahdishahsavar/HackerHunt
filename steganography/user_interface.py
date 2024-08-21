@@ -28,7 +28,8 @@ class Steganography:
         self.run_button = self._render_run_button()
 
     def _embed_message(self, message):
-        secret_image = lsb.hide("steganography/resources/hacker.gif", message)
+        image = Image.open("steganography/resources/hacker.gif").convert('RGB')
+        secret_image = lsb.hide(image, message)
         secret_image.save("steganography/resources/embedded_hacker.gif")
         return secret_image
 
@@ -115,3 +116,7 @@ class Steganography:
             self._render_text_to_surface(self.screen, self.users_code, (self.editor_rect.x + 10, 20), self.font, self.BLACK)
             self._display_photo()
             pygame.display.flip()
+
+if __name__ == "__main__":
+    test = Steganography()
+    test.run()
